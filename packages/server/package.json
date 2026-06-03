@@ -1,6 +1,6 @@
 {
   "name": "@jalipalo/webmux-server",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Fastify plugin: WebSocket terminal bridge backed by persistent tmux sessions (node-pty). The server side of webmux.",
   "license": "MIT",
   "author": "Jetz Alipalo",
@@ -22,13 +22,13 @@
     "prepublishOnly": "npm run build"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "peerDependencies": {
-    "fastify": "^4"
+    "fastify": "^5"
   },
   "dependencies": {
-    "@fastify/websocket": "^10.0.1",
+    "@fastify/websocket": "^11.2.0",
     "node-pty": "^1.1.0"
   },
   "keywords": [
@@ -47,7 +47,7 @@
   "homepage": "https://github.com/j10ra/webmux#readme",
   "devDependencies": {
     "@types/ws": "^8.18.1",
-    "fastify": "^4.29.1"
+    "fastify": "^5.8.5"
   },
   "publishConfig": {
     "access": "public"

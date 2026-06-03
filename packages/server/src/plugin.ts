@@ -51,6 +51,39 @@ export const terminalServer: FastifyPluginAsync<TerminalServerOptions> = async (
     { Params: { sessionId: string } }
   > = async (socket, req) => {
     const name = sanitizeName(req.params.sessionId);
+    const send = (d: string) => {
+      if (socket.readyState === socket.OPEN) socket.send(d);
+    };
+
+    // @fastify/websocket v11 requires event handlers to be attached SYNCHRONOUSLY, before any
+    // await — otherwise messages that arrive during the async setup (notably the client's initial
+    // \x00resize on open) are silently dropped. So attach now and buffer until the pty is ready.
+    let term: pty.IPty | null = null;
+    let pendingResize: [number, number] | null = null;
+    const inbuf: string[] = [];
+
+    socket.on("message", (raw: Buffer) => {
+      const m = raw.toString();
+
+      if (m.startsWith("\x00resize:")) {
+        const [c, r] = m.slice(8).split(",").map(Number);
+
+        if (c && r) {
+          if (term) term.resize(c, r);
+          else pendingResize = [c, r];
+        }
+      } else if (m === "\x00mouse:on" || m === "\x00mouse:off") {
+        // Toggle tmux mouse for this session only (so the client can enable it just while the wheel
+        // is spinning — scroll reaches tmux/the app — then disable it so xterm owns clicks again).
+        void run("tmux", ["set", "-t", name, "mouse", m === "\x00mouse:on" ? "on" : "off"]);
+      } else if (term) {
+        term.write(m);
+      } else {
+        inbuf.push(m);
+      }
+    });
+    socket.on("close", () => term?.kill());
+
     const cwd = await opts.resolveCwd(req.params.sessionId);
     const sc = opts.sessionCommand?.(req.params.sessionId) ?? {
       command: process.env.SHELL ?? "bash",
@@ -61,33 +94,21 @@ export const terminalServer: FastifyPluginAsync<TerminalServerOptions> = async (
 
     const history = await tmux.replay(name);
 
-    if (history) socket.send(history);
+    if (history) send(history);
 
-    const term = pty.spawn("tmux", attachArgs(name), {
+    term = pty.spawn("tmux", attachArgs(name), {
       name: "xterm-256color",
       cols: 80,
       rows: 24,
       env: process.env as Record<string, string>,
     });
 
-    term.onData((d) => socket.send(d));
+    if (pendingResize) term.resize(pendingResize[0], pendingResize[1]);
+    for (const m of inbuf) term.write(m);
+    inbuf.length = 0;
+
+    term.onData((d) => send(d));
     term.onExit(() => socket.close());
-    socket.on("message", (raw: Buffer) => {
-      const m = raw.toString();
-
-      if (m.startsWith("\x00resize:")) {
-        const [c, r] = m.slice(8).split(",").map(Number);
-
-        if (c && r) term.resize(c, r);
-      } else if (m === "\x00mouse:on" || m === "\x00mouse:off") {
-        // Toggle tmux mouse for this session only (so the client can enable it just while the wheel
-        // is spinning — scroll reaches tmux/the app — then disable it so xterm owns clicks again).
-        void run("tmux", ["set", "-t", name, "mouse", m === "\x00mouse:on" ? "on" : "off"]);
-      } else {
-        term.write(m);
-      }
-    });
-    socket.on("close", () => term.kill());
   };
 
   app.get("/ws/:sessionId", { websocket: true }, wsHandler);

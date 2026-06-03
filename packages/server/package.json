@@ -1,6 +1,6 @@
 {
   "name": "@jalipalo/webmux-server",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Fastify plugin: WebSocket terminal bridge backed by persistent tmux sessions (node-pty). The server side of webmux.",
   "license": "MIT",
   "author": "Jetz Alipalo",

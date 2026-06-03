@@ -79,6 +79,10 @@ export const terminalServer: FastifyPluginAsync<TerminalServerOptions> = async (
         const [c, r] = m.slice(8).split(",").map(Number);
 
         if (c && r) term.resize(c, r);
+      } else if (m === "\x00mouse:on" || m === "\x00mouse:off") {
+        // Toggle tmux mouse for this session only (so the client can enable it just while the wheel
+        // is spinning — scroll reaches tmux/the app — then disable it so xterm owns clicks again).
+        void run("tmux", ["set", "-t", name, "mouse", m === "\x00mouse:on" ? "on" : "off"]);
       } else {
         term.write(m);
       }

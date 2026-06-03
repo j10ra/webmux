@@ -27,6 +27,11 @@ export interface TerminalProps {
   // mouse passthrough, where a click/drag emits a mouse-report that counts as input and would
   // otherwise yank the viewport to the bottom whenever you click while scrolled up.
   scrollOnUserInput?: boolean;
+  // Under tmux the scrollback lives in tmux, so the wheel only scrolls when mouse mode is on — but
+  // mouse-on also sends clicks to the app. With this enabled, keep tmux mouse OFF (xterm owns
+  // clicks/selection) and momentarily flip it ON while the wheel is spinning, then OFF again after
+  // a short idle, so scroll works without the clicks-jump/Option-to-select cost most of the time.
+  autoMouseOnScroll?: boolean;
 }
 
 export function Terminal(props: TerminalProps) {
@@ -104,6 +109,30 @@ export function Terminal(props: TerminalProps) {
       // that onPaste depends on (text and image paste both flow through it).
       return false;
     });
+
+    // Flip tmux mouse ON only while the wheel is spinning (then OFF after a short idle), so scroll
+    // reaches tmux/the app without leaving mouse-on to hijack clicks. xterm forwards the wheel as a
+    // mouse event once tmux enables tracking; the first notch of a burst is spent turning it on.
+    let mouseToggleTimer = 0;
+
+    if (props.autoMouseOnScroll) {
+      let wheelMouseOn = false;
+
+      term.attachCustomWheelEventHandler((e) => {
+        if (!e.deltaY) return true;
+        if (!wheelMouseOn) {
+          wheelMouseOn = true;
+          if (ws.readyState === ws.OPEN) ws.send("\x00mouse:on");
+        }
+        clearTimeout(mouseToggleTimer);
+        mouseToggleTimer = window.setTimeout(() => {
+          wheelMouseOn = false;
+          if (ws.readyState === ws.OPEN) ws.send("\x00mouse:off");
+        }, 500);
+
+        return true;
+      });
+    }
 
     const copyOnMouseUp = () => {
       const s = term.getSelection();
@@ -204,6 +233,7 @@ export function Terminal(props: TerminalProps) {
       host.removeEventListener("dragover", onDragOver, true);
       cancelAnimationFrame(initialFit);
       fitTimers.forEach(clearTimeout);
+      clearTimeout(mouseToggleTimer);
       disposeTheme();
       ro.disconnect();
       ws.close();

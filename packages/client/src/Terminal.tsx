@@ -168,7 +168,9 @@ export function Terminal(props: TerminalProps) {
     host.addEventListener("drop", onDrop, true);
     host.addEventListener("dragover", onDragOver, true);
 
+    let disposed = false;
     const sendResize = () => {
+      if (disposed) return;
       fit.fit();
       if (ws.readyState === ws.OPEN) ws.send(`\x00resize:${term.cols},${term.rows}`);
     };
@@ -177,28 +179,26 @@ export function Terminal(props: TerminalProps) {
     const ro = new ResizeObserver(sendResize);
 
     ro.observe(host);
-    // The WebGL renderer measures cell size a frame or two after open, so an early fit (sync, or
-    // even one rAF) runs against zero-size cells: proposeDimensions returns undefined, fit() no-ops,
-    // and the pane stays 80x24 until a window resize forces a re-fit. Retry each frame until the
-    // renderer reports real dimensions, then size once. Capped (~1s) so a hidden tab can't spin.
-    let initialFit = 0;
-    let fitTries = 0;
-    const tryInitialFit = () => {
-      const dims = fit.proposeDimensions();
+    // Cell metrics aren't ready at mount: the web font loads asynchronously and the WebGL renderer
+    // measures cell size only on its first frame(s). A single early fit therefore computes the wrong
+    // column count ("cut off" width) and the pane stays mis-sized until a resize forces a re-fit —
+    // notably when opening a terminal into an already-laid-out page (a new tab), where no resize
+    // follows. So re-fit on every readiness signal: next frame, font load, and two short delays to
+    // catch the renderer/layout settling. Each is idempotent and cheap.
+    const initialFit = requestAnimationFrame(sendResize);
+    const fitTimers = [setTimeout(sendResize, 120), setTimeout(sendResize, 350)];
 
-      if (dims?.cols && dims.rows) sendResize();
-      else if (fitTries++ < 60) initialFit = requestAnimationFrame(tryInitialFit);
-    };
-
-    initialFit = requestAnimationFrame(tryInitialFit);
+    void document.fonts?.ready?.then(sendResize);
 
     return () => {
+      disposed = true;
       host.removeEventListener("mouseup", copyOnMouseUp);
       host.removeEventListener("contextmenu", onContextMenu);
       host.removeEventListener("paste", onPaste, true);
       host.removeEventListener("drop", onDrop, true);
       host.removeEventListener("dragover", onDragOver, true);
       cancelAnimationFrame(initialFit);
+      fitTimers.forEach(clearTimeout);
       disposeTheme();
       ro.disconnect();
       ws.close();

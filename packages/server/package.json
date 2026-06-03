@@ -7,15 +7,42 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
-  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-  "peerDependencies": { "fastify": ">=4" },
-  "dependencies": { "node-pty": "^1.0.0", "@fastify/websocket": "^10.0.0" },
-  "keywords": ["terminal", "tmux", "node-pty", "fastify", "websocket", "pty"],
-  "repository": { "type": "git", "url": "git+https://github.com/j10ra/webmux.git", "directory": "packages/server" },
-  "homepage": "https://github.com/j10ra/webmux#readme"
+  "peerDependencies": {
+    "fastify": ">=4"
+  },
+  "dependencies": {
+    "@fastify/websocket": "^10.0.1",
+    "node-pty": "^1.1.0"
+  },
+  "keywords": [
+    "terminal",
+    "tmux",
+    "node-pty",
+    "fastify",
+    "websocket",
+    "pty"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/j10ra/webmux.git",
+    "directory": "packages/server"
+  },
+  "homepage": "https://github.com/j10ra/webmux#readme",
+  "devDependencies": {
+    "@types/ws": "^8.18.1",
+    "fastify": "^4.29.1"
+  }
 }

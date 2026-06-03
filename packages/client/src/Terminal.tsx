@@ -105,6 +105,17 @@ export function Terminal(props: TerminalProps) {
       return false;
     });
 
+    term.attachCustomWheelEventHandler((e) => {
+      // Normal buffer: let xterm scroll its own scrollback. Alternate buffer (full-screen TUIs) has
+      // no scrollback, and xterm's default converts the wheel to arrow keys — which apps misread as
+      // cursor moves. Send PgUp/PgDn instead (what TUIs scroll on) and suppress the arrow default.
+      // This keeps tmux mouse OFF (xterm owns selection/copy with no coordinate-mismatch jumps).
+      if (term.buffer.active.type !== "alternate") return true;
+      if (ws.readyState === ws.OPEN) ws.send(e.deltaY < 0 ? "\x1b[5~" : "\x1b[6~");
+
+      return false;
+    });
+
     const copyOnMouseUp = () => {
       const s = term.getSelection();
 

@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { Terminal } from "webmux";
+import { Terminal } from "@jalipalo/webmux";
 
 createRoot(document.getElementById("root")!).render(
   <div style={{ height: "100vh" }}>

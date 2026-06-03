@@ -37,7 +37,7 @@ npm i webmux-server     # server (Fastify plugin)
 
 Server (Fastify):
 ```ts
-import { terminalServer } from "webmux-server";
+import { terminalServer } from "@jalipalo/webmux-server";
 app.register(terminalServer, {
   prefix: "/terminal",                                 // mount point (Fastify's own option)
   resolveCwd: (sessionId) => "/path/to/workdir/for/" + sessionId,
@@ -47,7 +47,7 @@ app.register(terminalServer, {
 
 Client (React):
 ```tsx
-import { Terminal } from "webmux";
+import { Terminal } from "@jalipalo/webmux";
 <Terminal
   sessionId="my-session"
   wsUrl={(id) => `ws://${location.host}/terminal/ws/${id}`}

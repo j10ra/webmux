@@ -1,5 +1,5 @@
 {
-  "name": "webmux",
+  "name": "@jalipalo/webmux",
   "version": "0.0.1",
   "description": "React web terminal (xterm.js) backed by a persistent tmux session over WebSocket — VSCode-grade UX: GPU rendering, search, clickable URL/file links, image paste.",
   "license": "MIT",
@@ -58,5 +58,8 @@
     "url": "git+https://github.com/j10ra/webmux.git",
     "directory": "packages/client"
   },
-  "homepage": "https://github.com/j10ra/webmux#readme"
+  "homepage": "https://github.com/j10ra/webmux#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }

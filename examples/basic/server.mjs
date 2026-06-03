@@ -2,7 +2,7 @@ import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { terminalServer } from "webmux-server";
+import { terminalServer } from "@jalipalo/webmux-server";
 
 const app = Fastify();
 

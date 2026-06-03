@@ -9,8 +9,8 @@
     "start": "node server.mjs"
   },
   "dependencies": {
-    "webmux": "*",
-    "webmux-server": "*",
+    "@jalipalo/webmux": "*",
+    "@jalipalo/webmux-server": "*",
     "fastify": "^4.29.1",
     "@fastify/static": "^7.0.0",
     "react": "^18.3.1",

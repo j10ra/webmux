@@ -5,7 +5,7 @@ import * as pty from "node-pty";
 import fastifyWebsocket from "@fastify/websocket";
 import type { FastifyPluginAsync } from "fastify";
 import { run } from "./exec.js";
-import { TmuxSessions, sanitizeName, attachArgs, sourceArgs } from "./tmux.js";
+import { TmuxSessions, sanitizeName, attachArgs, sourceArgs, writeTmuxConfig } from "./tmux.js";
 
 export interface TerminalServerOptions {
   resolveCwd: (sessionId: string) => string | Promise<string>;
@@ -13,6 +13,9 @@ export interface TerminalServerOptions {
   imageDir?: string;
   historyLimit?: number;
   imageBodyLimit?: number;
+  // tmux config sourced on each connect (defaults to DEFAULT_TMUX_CONFIG: status+mouse off). Set
+  // this to enable mouse passthrough, custom keybindings, etc.
+  tmuxConfig?: string;
 }
 
 const EXT: Record<string, string> = {
@@ -31,6 +34,8 @@ export const terminalServer: FastifyPluginAsync<TerminalServerOptions> = async (
   const historyLimit = opts.historyLimit ?? 20000;
   const imageDir = opts.imageDir ?? join(tmpdir(), "webmux-pastes");
   const tmux = new TmuxSessions(run, historyLimit);
+
+  writeTmuxConfig(opts.tmuxConfig);
 
   // A host app commonly registers @fastify/websocket already (for its own WS routes). It decorates
   // with `websocketServer` via fastify-plugin, and a second registration throws on the duplicate

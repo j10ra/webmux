@@ -49,9 +49,10 @@ export const historyLimitArgs = (name: string, lines: number): string[] => [
 export const killArgs = (name: string): string[] => ["kill-session", "-t", name];
 export const hasSessionArgs = (name: string): string[] => ["has-session", "-t", name];
 
-// One sourced config per connect: tmux is an invisible session host — status bar off (the browser
-// owns the chrome), mouse off (xterm owns scroll/selection/copy), OSC52 clipboard passthrough.
-const TMUX_CONFIG = `set -g status off
+// Default sourced config: tmux is an invisible session host — status bar off (the browser owns the
+// chrome), mouse off (xterm owns scroll/selection/copy), OSC52 clipboard passthrough. Override with
+// the `tmuxConfig` option, e.g. to enable mouse passthrough so full-screen apps get wheel events.
+export const DEFAULT_TMUX_CONFIG = `set -g status off
 set -g mouse off
 set -g set-clipboard on
 set -as terminal-features ",xterm-256color:clipboard"
@@ -59,10 +60,14 @@ set -as terminal-features ",xterm-256color:clipboard"
 
 export const tmuxConfigPath = join(tmpdir(), "webmux-tmux.conf");
 
-try {
-  writeFileSync(tmuxConfigPath, TMUX_CONFIG);
-} catch {
-  /* best-effort */
+// Write the config the plugin sources on each connect. Best-effort: the terminal still works
+// without the tweaks if the write fails.
+export function writeTmuxConfig(content: string = DEFAULT_TMUX_CONFIG): void {
+  try {
+    writeFileSync(tmuxConfigPath, content);
+  } catch {
+    /* best-effort */
+  }
 }
 
 export const sourceArgs = (): string[] => ["source-file", tmuxConfigPath];

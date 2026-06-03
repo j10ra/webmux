@@ -31,7 +31,10 @@ export const terminalServer: FastifyPluginAsync<TerminalServerOptions> = async (
   const imageDir = opts.imageDir ?? join(tmpdir(), "webmux-pastes");
   const tmux = new TmuxSessions(run, historyLimit);
 
-  await app.register(fastifyWebsocket);
+  // A host app commonly registers @fastify/websocket already (for its own WS routes). It decorates
+  // with `websocketServer` via fastify-plugin, and a second registration throws on the duplicate
+  // decorator — so only register it when the host hasn't.
+  if (!app.hasDecorator("websocketServer")) await app.register(fastifyWebsocket);
   app.addContentTypeParser(/^image\//, { parseAs: "buffer" }, (_req, body, done) =>
     done(null, body),
   );

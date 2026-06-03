@@ -51,10 +51,18 @@ import { Terminal } from "webmux";
 <Terminal
   sessionId="my-session"
   wsUrl={(id) => `ws://${location.host}/terminal/ws/${id}`}
-  uploadImage={(file) => fetch("/terminal/paste-image", { method: "POST", headers: { "Content-Type": file.type }, body: file }).then(r => r.json()).then(j => j.path)}
+  uploadEndpoint="/terminal/paste-image"          // enables image paste/drop
   onOpenLink={(l) => l.type === "url" ? window.open(l.value, "_blank", "noopener,noreferrer") : openInEditor(l.value)}
+  autoMouseOnScroll                                // tmux mouse off for native clicks; on while wheeling
 />
 ```
+
+## Limitations
+
+These follow from tmux owning the session (the trade for persistence) rather than from bugs:
+
+- **Selection is bounded to the visible viewport.** tmux holds the scrollback, so xterm has no local buffer to auto-scroll into while you drag — you can't extend a selection past the top/bottom edge. Scroll the text into view first, then select.
+- **Scrolling needs the mouse routed to tmux/the app.** A bare shell scrolls via tmux's history and full-screen apps scroll their own transcript, so the wheel only scrolls when tmux mouse mode is on. `autoMouseOnScroll` flips it on just while the wheel spins (and off otherwise, so xterm keeps native clicks/selection); the first notch of a burst is spent enabling it.
 
 ## License
 MIT © Jetz Alipalo

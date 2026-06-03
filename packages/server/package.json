@@ -18,10 +18,14 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "peerDependencies": {
-    "fastify": ">=4"
+    "fastify": "^4"
   },
   "dependencies": {
     "@fastify/websocket": "^10.0.1",

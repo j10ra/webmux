@@ -106,12 +106,17 @@ export function Terminal(props: TerminalProps) {
     });
 
     term.attachCustomWheelEventHandler((e) => {
-      // Normal buffer: let xterm scroll its own scrollback. Alternate buffer (full-screen TUIs) has
-      // no scrollback, and xterm's default converts the wheel to arrow keys — which apps misread as
-      // cursor moves. Send PgUp/PgDn instead (what TUIs scroll on) and suppress the arrow default.
-      // This keeps tmux mouse OFF (xterm owns selection/copy with no coordinate-mismatch jumps).
-      if (term.buffer.active.type !== "alternate") return true;
-      if (ws.readyState === ws.OPEN) ws.send(e.deltaY < 0 ? "\x1b[5~" : "\x1b[6~");
+      if (!e.deltaY) return true;
+      const buf = term.buffer.active;
+      const up = e.deltaY < 0;
+
+      // If xterm has scrollback to move in this direction, scroll it locally (normal shells).
+      if (up ? buf.viewportY > 0 : buf.viewportY < buf.baseY) return true;
+      // Otherwise the app keeps its own transcript and leaves no scrollback (e.g. Claude Code, which
+      // redraws in place). With tmux mouse OFF it can't get wheel events, so forward PgUp/PgDn —
+      // what full-screen apps scroll on — instead of xterm's arrow-key alt-scroll. This keeps mouse
+      // OFF so xterm owns selection/copy (plain drag, double-click word) with no jumps.
+      if (ws.readyState === ws.OPEN) ws.send(up ? "\x1b[5~" : "\x1b[6~");
 
       return false;
     });

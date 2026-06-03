@@ -5,11 +5,13 @@
   "description": "A browser terminal backed by a persistent tmux session over WebSocket, with VSCode-grade UX.",
   "license": "MIT",
   "author": "Jetz Alipalo",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "test": "vitest run",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "check": "biome check .",
@@ -20,7 +22,10 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
     "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/node": "^22.5.0",
     "@typescript-eslint/parser": "^8.60.0",
-    "eslint": "^10.4.1"
+    "eslint": "^10.4.1",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
   }
 }

@@ -2,8 +2,22 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    environment: "node",
-    include: ["packages/*/test/**/*.test.ts"],
     passWithNoTests: true,
+    projects: [
+      {
+        test: {
+          name: "server",
+          environment: "node",
+          include: ["packages/server/test/**/*.test.ts"],
+        },
+      },
+      {
+        test: {
+          name: "client",
+          environment: "jsdom",
+          include: ["packages/client/test/**/*.test.ts"],
+        },
+      },
+    ],
   },
 });

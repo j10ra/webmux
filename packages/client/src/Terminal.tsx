@@ -210,10 +210,16 @@ export function Terminal(props: TerminalProps) {
     host.addEventListener("dragover", onDragOver, true);
 
     let disposed = false;
+    const reveal = () => {
+      if (!disposed) host.style.opacity = "1";
+    };
     const sendResize = () => {
       if (disposed) return;
       fit.fit();
       if (ws.readyState === ws.OPEN) ws.send(`\x00resize:${term.cols},${term.rows}`);
+      // Reveal once the renderer reports real dimensions (the fit actually sized the pane), so the
+      // terminal fades in already-correct instead of flashing 80x24 then expanding on a tab switch.
+      if (fit.proposeDimensions()?.cols) reveal();
     };
 
     ws.onopen = sendResize;
@@ -227,7 +233,9 @@ export function Terminal(props: TerminalProps) {
     // follows. So re-fit on every readiness signal: next frame, font load, and two short delays to
     // catch the renderer/layout settling. Each is idempotent and cheap.
     const initialFit = requestAnimationFrame(sendResize);
-    const fitTimers = [setTimeout(sendResize, 120), setTimeout(sendResize, 350)];
+    // Last timer is a safety reveal so the terminal can never stay hidden if dimension detection
+    // somehow never validates.
+    const fitTimers = [setTimeout(sendResize, 120), setTimeout(sendResize, 350), setTimeout(reveal, 450)];
 
     void document.fonts?.ready?.then(sendResize);
 
@@ -250,7 +258,10 @@ export function Terminal(props: TerminalProps) {
 
   return (
     <>
-      <div style={{ height: "100%", width: "100%" }} ref={hostRef} />
+      <div
+        style={{ height: "100%", width: "100%", opacity: 0, transition: "opacity 80ms ease-out" }}
+        ref={hostRef}
+      />
       <Lightbox file={expand} onClose={() => setExpand(null)} />
     </>
   );

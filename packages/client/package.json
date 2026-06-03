@@ -1,6 +1,6 @@
 {
   "name": "@jalipalo/webmux",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "React web terminal (xterm.js) backed by a persistent tmux session over WebSocket — VSCode-grade UX: GPU rendering, search, clickable URL/file links, image paste.",
   "license": "MIT",
   "author": "Jetz Alipalo",

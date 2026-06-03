@@ -177,10 +177,20 @@ export function Terminal(props: TerminalProps) {
     const ro = new ResizeObserver(sendResize);
 
     ro.observe(host);
-    // Initial fit on the next frame: a synchronous fit at mount can measure the host before its
-    // flex layout settles (and before the WebGL renderer has cell metrics), locking the pane to
-    // 80x24 until the first real resize. Deferring one frame lets layout + renderer settle.
-    const initialFit = requestAnimationFrame(sendResize);
+    // The WebGL renderer measures cell size a frame or two after open, so an early fit (sync, or
+    // even one rAF) runs against zero-size cells: proposeDimensions returns undefined, fit() no-ops,
+    // and the pane stays 80x24 until a window resize forces a re-fit. Retry each frame until the
+    // renderer reports real dimensions, then size once. Capped (~1s) so a hidden tab can't spin.
+    let initialFit = 0;
+    let fitTries = 0;
+    const tryInitialFit = () => {
+      const dims = fit.proposeDimensions();
+
+      if (dims?.cols && dims.rows) sendResize();
+      else if (fitTries++ < 60) initialFit = requestAnimationFrame(tryInitialFit);
+    };
+
+    initialFit = requestAnimationFrame(tryInitialFit);
 
     return () => {
       host.removeEventListener("mouseup", copyOnMouseUp);

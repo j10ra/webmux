@@ -49,8 +49,10 @@ export const historyLimitArgs = (name: string, lines: number): string[] => [
 export const killArgs = (name: string): string[] => ["kill-session", "-t", name];
 export const hasSessionArgs = (name: string): string[] => ["has-session", "-t", name];
 
-// One sourced config per connect: mouse off (xterm owns UX), OSC52 clipboard.
-const TMUX_CONFIG = `set -g mouse off
+// One sourced config per connect: tmux is an invisible session host — status bar off (the browser
+// owns the chrome), mouse off (xterm owns scroll/selection/copy), OSC52 clipboard passthrough.
+const TMUX_CONFIG = `set -g status off
+set -g mouse off
 set -g set-clipboard on
 set -as terminal-features ",xterm-256color:clipboard"
 `;

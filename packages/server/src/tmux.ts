@@ -64,3 +64,56 @@ try {
 }
 
 export const sourceArgs = (): string[] => ["source-file", tmuxConfigPath];
+
+export interface RunResult {
+  code: number;
+  stdout: string;
+  stderr: string;
+}
+export type Runner = (cmd: string, args: string[]) => Promise<RunResult>;
+
+export class TmuxSessions {
+  constructor(
+    private run: Runner,
+    private historyLimit: number,
+  ) {}
+
+  async ensure(
+    name: string,
+    cwd: string,
+    command: string,
+    env: Record<string, string>,
+  ): Promise<void> {
+    if ((await this.run("tmux", hasSessionArgs(name))).code === 0) return;
+    const r = await this.run("tmux", newSessionArgs(name, cwd, command, env));
+
+    if (r.code !== 0) throw new Error(`tmux new-session failed: ${r.stderr}`);
+    await this.run("tmux", historyLimitArgs(name, this.historyLimit));
+  }
+
+  async replay(name: string): Promise<string> {
+    const r = await this.run("tmux", captureArgs(name, this.historyLimit));
+
+    return r.code === 0 ? r.stdout : "";
+  }
+
+  async kill(name: string): Promise<void> {
+    await this.run("tmux", killArgs(name));
+  }
+
+  async list(): Promise<string[]> {
+    const r = await this.run("tmux", ["ls", "-F", "#{session_name}"]);
+
+    return r.code === 0
+      ? r.stdout
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean)
+      : [];
+  }
+
+  async sendKeys(name: string, text: string): Promise<void> {
+    await this.run("tmux", ["send-keys", "-t", name, "-l", "--", text]);
+    await this.run("tmux", ["send-keys", "-t", name, "Enter"]);
+  }
+}

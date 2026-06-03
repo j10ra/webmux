@@ -130,6 +130,13 @@ export function Terminal(props: TerminalProps) {
           if (ws.readyState === ws.OPEN) ws.send("\x00mouse:off");
         }, 500);
 
+        // Suppress xterm's alternate-scroll: in the alt buffer with no app mouse-tracking (e.g. the
+        // first notch before tmux mouse-on lands), xterm would emit arrow keys, which apps like
+        // Claude misread as history/cursor moves. Let real mouse forwarding and scrollback through.
+        if (term.buffer.active.type === "alternate" && term.modes.mouseTrackingMode === "none") {
+          return false;
+        }
+
         return true;
       });
     }

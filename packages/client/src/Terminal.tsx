@@ -23,6 +23,10 @@ export interface TerminalProps {
   fontFamily?: string;
   fontSize?: number;
   scrollback?: number;
+  // Scroll the viewport to the bottom on user input. Default true (xterm's default). Set false with
+  // mouse passthrough, where a click/drag emits a mouse-report that counts as input and would
+  // otherwise yank the viewport to the bottom whenever you click while scrolled up.
+  scrollOnUserInput?: boolean;
 }
 
 export function Terminal(props: TerminalProps) {
@@ -44,6 +48,7 @@ export function Terminal(props: TerminalProps) {
           : themeFor(),
       macOptionClickForcesSelection: true,
       scrollback: props.scrollback ?? 20000,
+      scrollOnUserInput: props.scrollOnUserInput ?? true,
       allowProposedApi: true,
     });
     const fit = new FitAddon();

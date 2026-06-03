@@ -1,0 +1,31 @@
+{
+  "name": "webmux",
+  "version": "0.0.1",
+  "description": "React web terminal (xterm.js) backed by a persistent tmux session over WebSocket — VSCode-grade UX: GPU rendering, search, clickable URL/file links, image paste.",
+  "license": "MIT",
+  "author": "Jetz Alipalo",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": { "react": ">=18", "react-dom": ">=18" },
+  "dependencies": {
+    "@xterm/xterm": "^5.5.0",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/addon-web-links": "^0.12.0",
+    "@xterm/addon-clipboard": "^0.2.0",
+    "@xterm/addon-search": "^0.15.0",
+    "@xterm/addon-webgl": "^0.18.0",
+    "@xterm/addon-unicode11": "^0.8.0"
+  },
+  "keywords": ["terminal", "xterm", "tmux", "websocket", "react", "web-terminal", "pty"],
+  "repository": { "type": "git", "url": "git+https://github.com/j10ra/webmux.git", "directory": "packages/client" },
+  "homepage": "https://github.com/j10ra/webmux#readme"
+}

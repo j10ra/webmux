@@ -14,7 +14,7 @@ describe("tmux args", () => {
     expect(sanitizeName("a.b:c d")).toBe("a_b_c_d");
   });
   it("new-session is detached, in cwd, with env pairs and split command", () => {
-    expect(newSessionArgs("s", "/wt/x", "claude --foo", { A: "1" })).toEqual([
+    expect(newSessionArgs("s", "/wt/x", "agent --foo", { A: "1" })).toEqual([
       "new-session",
       "-d",
       "-s",
@@ -23,7 +23,7 @@ describe("tmux args", () => {
       "/wt/x",
       "-e",
       "A=1",
-      "claude",
+      "agent",
       "--foo",
     ]);
   });

@@ -101,8 +101,8 @@ describe("tmux args", () => {
     expect(sanitizeName("a.b:c d")).toBe("a_b_c_d");
   });
   it("new-session is detached, in cwd, with env pairs and split command", () => {
-    expect(newSessionArgs("s", "/wt/x", "claude --foo", { A: "1" })).toEqual([
-      "new-session", "-d", "-s", "s", "-c", "/wt/x", "-e", "A=1", "claude", "--foo",
+    expect(newSessionArgs("s", "/wt/x", "agent --foo", { A: "1" })).toEqual([
+      "new-session", "-d", "-s", "s", "-c", "/wt/x", "-e", "A=1", "agent", "--foo",
     ]);
   });
   it("attach + capture + history args", () => {
@@ -137,7 +137,7 @@ export function newSessionArgs(
   env: Record<string, string> = {},
 ): string[] {
   const envArgs = Object.entries(env).flatMap(([k, v]) => ["-e", `${k}=${v}`]);
-  // split so commands with flags ("claude --foo") become separate argv entries
+  // split so commands with flags ("agent --foo") become separate argv entries
   return ["new-session", "-d", "-s", name, "-c", cwd, ...envArgs, ...command.split(" ").filter(Boolean)];
 }
 

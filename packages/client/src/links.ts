@@ -1,7 +1,7 @@
 import type { ILink, ILinkProvider, Terminal } from "@xterm/xterm";
 
 export const FILE_LINK_RE =
-  /(\/workspace\/)?([\w.\-/]*\w+\.(?:tsx?|jsx?|mjs|cjs|json|md|html?|s?css|sass|less|ya?ml|toml|xml|sh|bash|zsh|py|go|rs|java|kt|swift|cpp?|cc|hpp?|rb|php|sql|conf|ini|env|lock|txt|log|cs|csproj|sln|vbproj|vue|svelte|astro|razor|cshtml|aspx|gradle|properties|dockerfile))(?![a-zA-Z0-9])(?::(\d+)(?::(?=(\d+)))?)?/gi;
+  /(\/workspace\/)?([\w.\-/]*\w+\.(?:tsx?|jsx?|mjs|cjs|json|md|html?|s?css|sass|less|ya?ml|toml|xml|sh|bash|zsh|py|go|rs|java|kt|swift|cpp?|cc|hpp?|rb|php|sql|conf|ini|env|lock|txt|log|cs|csproj|sln|vbproj|vue|svelte|astro|razor|cshtml|aspx|gradle|properties|dockerfile))(?![a-zA-Z0-9])(?::(\d+)(?::(\d+))?)?/gi;
 
 export interface ParsedFileLink {
   value: string;

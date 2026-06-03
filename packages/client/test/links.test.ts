@@ -8,7 +8,7 @@ describe("file links", () => {
       line: 42,
       col: 5,
       index: 4,
-      length: 14,
+      length: 15,
     });
     expect(parseFileLink("/workspace/Project/x.cs")).toEqual({
       value: "Project/x.cs",

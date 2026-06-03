@@ -54,6 +54,7 @@ export const hasSessionArgs = (name: string): string[] => ["has-session", "-t", 
 // the `tmuxConfig` option, e.g. to enable mouse passthrough so full-screen apps get wheel events.
 export const DEFAULT_TMUX_CONFIG = `set -g status off
 set -g mouse off
+set -g focus-events on
 set -g set-clipboard on
 set -as terminal-features ",xterm-256color:clipboard"
 `;

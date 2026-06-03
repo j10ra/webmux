@@ -6,7 +6,8 @@
   "license": "MIT",
   "author": "Jetz Alipalo",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",

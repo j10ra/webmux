@@ -62,7 +62,6 @@ export function Terminal(props: TerminalProps) {
       /* canvas/DOM fallback */
     }
 
-    fit.fit();
     term.focus();
 
     const disposeTheme = observeTheme((t) => {
@@ -91,9 +90,13 @@ export function Terminal(props: TerminalProps) {
 
       if (d.action === "passthrough") return true;
       if (d.action === "copy") void writeClipboard(term.getSelection());
-      if (d.action === "send" && ws.readyState === ws.OPEN) ws.send(d.data);
-      if (d.swallow) e.preventDefault();
-
+      if (d.action === "send") {
+        if (ws.readyState === ws.OPEN) ws.send(d.data);
+        e.preventDefault();
+      }
+      // copy/paste ("none"): return false so xterm ignores the key, but do NOT preventDefault —
+      // cancelling the Cmd/Ctrl+V keydown default would also suppress the browser `paste` event
+      // that onPaste depends on (text and image paste both flow through it).
       return false;
     });
 
@@ -174,6 +177,10 @@ export function Terminal(props: TerminalProps) {
     const ro = new ResizeObserver(sendResize);
 
     ro.observe(host);
+    // Initial fit on the next frame: a synchronous fit at mount can measure the host before its
+    // flex layout settles (and before the WebGL renderer has cell metrics), locking the pane to
+    // 80x24 until the first real resize. Deferring one frame lets layout + renderer settle.
+    const initialFit = requestAnimationFrame(sendResize);
 
     return () => {
       host.removeEventListener("mouseup", copyOnMouseUp);
@@ -181,6 +188,7 @@ export function Terminal(props: TerminalProps) {
       host.removeEventListener("paste", onPaste, true);
       host.removeEventListener("drop", onDrop, true);
       host.removeEventListener("dragover", onDragOver, true);
+      cancelAnimationFrame(initialFit);
       disposeTheme();
       ro.disconnect();
       ws.close();

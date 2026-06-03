@@ -39,6 +39,7 @@ Server (Fastify):
 ```ts
 import { terminalServer } from "webmux-server";
 app.register(terminalServer, {
+  prefix: "/terminal",                                 // mount point (Fastify's own option)
   resolveCwd: (sessionId) => "/path/to/workdir/for/" + sessionId,
   // sessionCommand?: (id) => ({ command: "bash" }),  // default: $SHELL
 });

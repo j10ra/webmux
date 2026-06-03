@@ -6,7 +6,10 @@ import { terminalServer } from "webmux-server";
 
 const app = Fastify();
 
-await app.register(terminalServer, { resolveCwd: () => process.env.HOME ?? "/tmp" });
+await app.register(terminalServer, {
+  prefix: "/terminal",
+  resolveCwd: () => process.env.HOME ?? "/tmp",
+});
 
 const dist = join(dirname(fileURLToPath(import.meta.url)), "dist");
 

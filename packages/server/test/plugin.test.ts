@@ -15,7 +15,11 @@ it("registers alongside a host that already registered @fastify/websocket", asyn
 it("paste-image saves the body and returns a path", async () => {
   const app = Fastify();
 
-  await app.register(terminalServer, { resolveCwd: () => "/tmp", imageDir: "/tmp/webmux-test" });
+  await app.register(terminalServer, {
+    prefix: "/terminal",
+    resolveCwd: () => "/tmp",
+    imageDir: "/tmp/webmux-test",
+  });
   const res = await app.inject({
     method: "POST",
     url: "/terminal/paste-image",
